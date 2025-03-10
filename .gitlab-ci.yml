@@ -1,31 +1,32 @@
 stages:
   - build
-
-
-# variables:
-  # MAVEN_OPTS: "-Dmaven.repo.local=.m2/repository"  # Local repository cache
+  - test
 
 before_script:
-  - sudo apt update -y && \
-    sudo apt install openjdk-11-jdk -y && \
-    wget https://dlcdn.apache.org/maven/maven-3/3.9.9/binaries/apache-maven-3.9.9-bin.tar.gz && \
-    sudo mv apache-maven-3.9.9-bin.tar.gz /usr/local/bin && \
-    cd /usr/local/bin && \
-    sudo tar xzvf /usr/local/bin/apache-maven-3.9.9-bin.tar.gz && \
-    sudo ln -s /usr/local/bin/apache-maven-3.9.9/bin/mvn /usr/local/bin/mvn
+  - sudo apt update -y &&
+    sudo apt install openjdk-11-jdk -y &&
+    wget https://dlcdn.apache.org/maven/maven-3/3.9.9/binaries/apache-maven-3.9.9-bin.tar.gz &&
+    sudo mv apache-maven-3.9.9-bin.tar.gz /usr/local/bin &&
+    pushd /usr/local/bin &&
+    sudo tar xzvf /usr/local/bin/apache-maven-3.9.9-bin.tar.gz &&
+    sudo ln -fs /usr/local/bin/apache-maven-3.9.9/bin/mvn /usr/local/bin/mvn &&
+    popd
 
 # Build stage
 build:
   stage: build
   script:
-    # - mvn clean install -DskipTests
-    - mvn clean package
+    - mvn clean
+    - mvn validate
+    - mvn compile
+    - mvn package
   artifacts:
     paths:
       - target/*.jar  # Path to your built artifacts (e.g., JAR files)
 
 # Test stage
-# test:
-#   stage: test
-#   script:
-#     - mvn test
+test:
+  stage: test
+  script:
+    - mvn test
+    - mvn verify
