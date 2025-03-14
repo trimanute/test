@@ -1,0 +1,45 @@
+version: 0.2
+
+env:
+  variables:
+    WEATHER_API_KEY: "14bbc7727da84b768a690118250603"
+
+phases:
+  install:
+    runtime-versions:
+      java: corretto11
+    commands:
+      - echo Installing Maven...
+      - yum install -y maven
+      - java -version
+      - mvn -version
+
+  pre_build:
+    commands:
+      - echo Pre-build phase started on `date`
+      - mvn test
+
+  build:
+    commands:
+      - echo Build phase started on `date`
+      - mvn package spring-boot:repackage
+      - echo Build completed on `date`
+
+  post_build:
+    commands:
+      - echo Post-build phase started on `date`
+      - mv target/weather-service-1.0-SNAPSHOT.jar app.jar
+      - chmod +x scripts/*.sh
+      - printf '[{"name":"app.jar","sourceUrl":"app.jar"}]' > filemap.json
+
+artifacts:
+  files:
+    - app.jar
+    - appspec.yml
+    - scripts/**/*
+    - filemap.json
+  discard-paths: no
+
+cache:
+  paths:
+    - '/root/.m2/**/*'
